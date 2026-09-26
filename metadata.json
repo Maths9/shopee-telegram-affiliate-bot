@@ -1,0 +1,6 @@
+{
+  "name": "Shopee Telegram Affiliate Bot",
+  "description": "Bot do Telegram em Python para postagem automática de ofertas da Shopee em canais com conversão de links de afiliado.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
