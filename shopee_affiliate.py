@@ -200,28 +200,51 @@ class ShopeeAffiliateClient:
     def get_product_offer(self, item_id: int, shop_id: int) -> Dict[str, Any]:
         """
         Consulta a API de afiliados da Shopee via productOfferV2 para obter dados do produto:
-        nome, priceMin, priceMax, priceDiscountRate, imageUrl, status, etc.
+        nome, priceMin, priceMax, priceDiscountRate, imageUrl, offerLink, etc.
         """
         query = f"""
         query {{
           productOfferV2(itemId: {item_id}, shopId: {shop_id}) {{
-            itemId
-            shopId
-            productName
-            priceMin
-            priceMax
-            priceDiscountRate
-            imageUrl
-            offerLink
-            status
+            nodes {{
+              itemId
+              shopId
+              productName
+              priceMin
+              priceMax
+              priceDiscountRate
+              imageUrl
+              offerLink
+            }}
           }}
         }}
         """
         result = self._execute_graphql(query)
-        offer = result.get("productOfferV2")
-        if not offer:
-            raise ValueError(f"Produto item_id={item_id}, shop_id={shop_id} não encontrado na API de Afiliados.")
-        return offer
+        connection = result.get("productOfferV2") or {}
+        nodes = connection.get("nodes") or []
+        if not nodes:
+            # Fallback: tenta buscar apenas por itemId caso o shopId tenha mudado
+            query_alt = f"""
+            query {{
+              productOfferV2(itemId: {item_id}) {{
+                nodes {{
+                  itemId
+                  shopId
+                  productName
+                  priceMin
+                  priceMax
+                  priceDiscountRate
+                  imageUrl
+                  offerLink
+                }}
+              }}
+            }}
+            """
+            result_alt = self._execute_graphql(query_alt)
+            nodes = (result_alt.get("productOfferV2") or {}).get("nodes") or []
+
+        if not nodes:
+            raise ValueError(f"Produto item_id={item_id}, shop_id={shop_id} não possui oferta ativa na API de Afiliados.")
+        return nodes[0]
 
     def generate_short_link(self, origin_url: str, sub_ids: Optional[list[str]] = None) -> str:
         """
