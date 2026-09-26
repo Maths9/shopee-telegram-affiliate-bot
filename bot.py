@@ -139,23 +139,23 @@ def build_inline_keyboard(affiliate_url: str, product_name: str = "") -> types.I
     """
     Cria os botões inline do post:
     1. '🛒 COMPRAR' (abre o link de afiliado)
-    2. '📢 COMPARTILHAR' (link especial t.me/share/url com texto de divulgação)
+    2. '📲 WHATSAPP' (abre o WhatsApp com mensagem e link formatados para compartilhar com amigos ou grupos)
     """
     markup = types.InlineKeyboardMarkup(row_width=2)
 
     # Botão de compra direta com link de afiliado
     btn_buy = types.InlineKeyboardButton(text="🛒 COMPRAR", url=affiliate_url)
 
-    # Texto para compartilhamento no Telegram
-    share_title = product_name[:60] if product_name else "Super Oferta na Shopee"
-    share_channel_text = f" no {CANAL_USERNAME}" if CANAL_USERNAME else ""
-    share_text = f"🔥 Olha essa oferta que encontrei{share_channel_text}: {share_title}!\n\nAproveite:"
+    # Texto formatado para compartilhamento no WhatsApp
+    share_title = product_name[:80] if product_name else "Super Oferta na Shopee"
+    wa_text = f"🔥 *Olha essa oferta imperdível na Shopee!*\n\n{share_title}\n\n👉 Aproveite aqui: {affiliate_url}"
+    wa_url = f"https://api.whatsapp.com/send?text={quote(wa_text)}"
 
-    share_url = f"https://t.me/share/url?url={quote(affiliate_url)}&text={quote(share_text)}"
-    btn_share = types.InlineKeyboardButton(text="📢 COMPARTILHAR", url=share_url)
+    btn_wa = types.InlineKeyboardButton(text="📲 WHATSAPP", url=wa_url)
 
-    markup.add(btn_buy, btn_share)
+    markup.add(btn_buy, btn_wa)
     return markup
+
 
 
 @bot.message_handler(commands=["start", "help"])
